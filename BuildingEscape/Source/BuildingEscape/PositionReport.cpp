@@ -11,7 +11,6 @@ UPositionReport::UPositionReport()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
 }
 
 
@@ -20,7 +19,22 @@ void UPositionReport::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	AActor* someActor = GetOwner();
+	FString ObjectName = someActor->GetName();
+	FString ObjectPos = "X = " + FString::SanitizeFloat(someActor->GetActorLocation().X) + 
+						FString(", Y = ") + FString::SanitizeFloat(someActor->GetActorLocation().Y) + 
+						FString(", Z = ") + FString::SanitizeFloat(someActor->GetActorLocation().Z);
+	// or
+	FString ObjectPos2 = someActor->GetTransform().GetLocation().ToString();
+	// or
+	FString ObjectPos3 = someActor->GetActorLocation().ToString();
+	
+	// MACRO. Log color
+	// Warning: Yellow
+	// Log: Grey
+	// Error: Red
+	// UE_LOG is expecting a TCHAR array, and the * effectively converts the string to this type
+	UE_LOG(LogTemp, Warning, TEXT("%s is at %s"), *ObjectName, *ObjectPos3);
 	
 }
 
