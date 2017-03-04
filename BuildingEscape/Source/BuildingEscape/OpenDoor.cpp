@@ -19,19 +19,32 @@ UOpenDoor::UOpenDoor()
 void UOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
-
 	// Find creator actor
-	AActor* Owner = GetOwner();
+	Owner = GetOwner();
+	// A pawn is a actor that's why we can do it
+	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
+	
+}
 
+void UOpenDoor::OpenDoor()
+{
+	
 	// Create a rotator.
 	// Parameters.
 	// 1st Pitch:
 	// 2nd Yaw:
 	// 3rd Roll:
-	FRotator NewRotation = FRotator(0.0f, -30.0f,0.0f);
+	// FRotator NewRotation = FRotator(0.0f, OpenAngle, 0.0f);
 	// Find Z rotation 
-	Owner->SetActorRotation(NewRotation);
-	
+	// Owner->SetActorRotation(NewRotation);
+	Owner->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
+	isDoorOpenned = true;
+}
+
+void UOpenDoor::CloseDoor()
+{
+	Owner->SetActorRotation(FRotator(0.0f, OpenAngle-90.f, 0.0f));
+	isDoorOpenned = false;
 }
 
 
@@ -40,6 +53,18 @@ void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompo
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	// ...
+	// Pool the Trigger Volume
+	if (PressurePlate->IsOverlappingActor(ActorThatOpens)) {
+		OpenDoor();
+		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
+	}
+	
+	// Check if it is time to close the door
+	if (isDoorOpenned) {
+		if ((GetWorld()->GetTimeSeconds() - LastDoorOpenTime) > DoorCloseDelay) {
+			CloseDoor();
+		}
+	}
+	
 }
 
