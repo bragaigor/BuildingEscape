@@ -26,4 +26,11 @@ private:
 	// How far ahead of the player can we reach in cm
 	float Reach;
 	
+	UPhysicsHandleComponent* PhysicsHandle = nullptr;
+	UInputComponent* InputComponent = nullptr;
+
+	// Ray-cast and grab what's in reach
+	void Grab();
+	// Ray-cast and release what's currently grabbing
+	void Release();
 };
