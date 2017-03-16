@@ -43,10 +43,10 @@ void UGrabber::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompon
 	);
 	// Prints Location and location to the screen
 	// REMEMBER!!!! WE NEED TO DEREFERENCE BY ADDING A STAR TO THE PARAMETERS OF THE FORMATING STRING!!!!
-	UE_LOG(LogTemp, Warning, TEXT("Location: %s, Rotation: %s"), 
+	/*UE_LOG(LogTemp, Warning, TEXT("Location: %s, Rotation: %s"), 
 		*PlayerViewPointLocation.ToString(), 
 		*PlayerViewPointRotation.ToString()
-	);
+	);*/
 
 	// Draw a red trace in the world to visual
 	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
@@ -61,8 +61,28 @@ void UGrabber::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompon
 		10.f
 	);
 
-	// Ray-cast out to reach distance. Laser until obstacle
+	// Setup query parameters
+	FCollisionQueryParams TraceParameters(FName(TEXT("")), false, GetOwner());
 
-	// See what we hit
+	// Line-trace (AKA Ray-cast) out to reach distance. Laser until obstacle
+	FHitResult Hit;
+	GetWorld()->LineTraceSingleByObjectType(
+		OUT Hit,
+		PlayerViewPointLocation,
+		LineTraceEnd,
+		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
+		TraceParameters
+	);
+
+	// Log what we hit
+	AActor* ActorHitted = Hit.GetActor();
+	if (ActorHitted) // Check for null
+	{
+		FString ActorsName = ActorHitted->GetName();
+		UE_LOG(LogTemp, Warning, TEXT("Line trace hit: %s"),
+				*ActorsName
+			);
+	}
+	
 }
 
