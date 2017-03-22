@@ -33,4 +33,13 @@ private:
 	void Grab();
 	// Ray-cast and release what's currently grabbing
 	void Release();
+
+	// Find attached physics chandle component
+	void FindPhysicsHandleComponent();
+
+	// Setup (assumed) input component
+	void SetupInputComponent();
+
+	// Return hit for first physics body in reach
+	FHitResult GetFirstPhysicsBodyInReach() const;
 };
