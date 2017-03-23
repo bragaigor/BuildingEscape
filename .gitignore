@@ -8,5 +8,8 @@ BuildingEscape/Content/StarterContent/
 
 # Visual Studio Generated Files
 *.VC.db
+*.VC.opendb
+*.sln
 BuildingEscape/Content/NewMap_BuiltData.uasset
 BuildingEscape/.vs/BuildingEscape/v15/ipch/AutoPCH/BUILDINGESCAPE-134898cc/GRABBER-32feff84/GRABBER.ipch
+BuildingEscape/.vs/BuildingEscape/v15/ipch/AutoPCH/BUILDINGESCAPE-134898cc/OPENDOOR-6b8a47b5/OPENDOOR.ipch

@@ -42,4 +42,10 @@ private:
 
 	// Return hit for first physics body in reach
 	FHitResult GetFirstPhysicsBodyInReach() const;
+
+	// Gets the BEGINNING of the line trace which is the start from the player (Pawn)
+	FVector GetLineTraceStart() const;
+
+	// Gets the END of the line trace that starts from the player (Pawn)
+	FVector GetLineTraceEnd() const;
 };

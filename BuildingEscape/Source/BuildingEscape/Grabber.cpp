@@ -33,7 +33,7 @@ void UGrabber::FindPhysicsHandleComponent() {
 	/// Look for attached physics handle
 	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 
-	if (PhysicsHandle)
+	if (PhysicsHandle != nullptr)
 	{
 		// Physics handle is found
 	}
@@ -77,7 +77,7 @@ void UGrabber::Grab() {
 	/// LINE TRACE and see if we reach any actors with physics body collision channel set
 	/// Auto will set the variable to the type that the function returns. In this case is a FHitResult
 	auto HitResult = GetFirstPhysicsBodyInReach();
-	auto ComponentToGrab = HitResult.GetComponent();
+	auto ComponentToGrab = HitResult.GetComponent(); // Gets the mesh in our case 
 	auto ActorHit = HitResult.GetActor();
 
 	/// If we hit something then attach a physics handle
@@ -86,7 +86,7 @@ void UGrabber::Grab() {
 		// Attach physics handle
 		PhysicsHandle->GrabComponent(
 			ComponentToGrab,
-			NAME_None,
+			NAME_None, // No bones needed
 			ComponentToGrab->GetOwner()->GetActorLocation(),
 			true // Allow rotation
 		);
@@ -104,26 +104,11 @@ void UGrabber::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	FVector PlayerViewPointLocation;
-	FRotator PlayerViewPointRotation;
-	ActorController->GetPlayerViewPoint(
-		OUT PlayerViewPointLocation, // The calling function will change this variable
-		OUT PlayerViewPointRotation
-	);
-	// Prints Location and location to the screen
-	// REMEMBER!!!! WE NEED TO DEREFERENCE BY ADDING A STAR TO THE PARAMETERS OF THE FORMATING STRING!!!!
-	/*UE_LOG(LogTemp, Warning, TEXT("Location: %s, Rotation: %s"),
-	*PlayerViewPointLocation.ToString(),
-	*PlayerViewPointRotation.ToString()
-	);*/
-
-	// Draw a red trace in the world to visual
-	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
-
-
 	// If the physics handle is atached 
 	if (PhysicsHandle->GrabbedComponent)
 	{
+		// Sets the end of a line trace in the world according to the Pawn location
+		FVector LineTraceEnd = GetLineTraceEnd();
 		// move the object that we're holding
 		PhysicsHandle->SetTargetLocation(LineTraceEnd);
 	}
@@ -131,33 +116,22 @@ void UGrabber::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompon
 
 FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
 {
-	// Get player view point this tick
-	FVector PlayerViewPointLocation;
-	FRotator PlayerViewPointRotation;
-	ActorController->GetPlayerViewPoint(
-		OUT PlayerViewPointLocation, // The calling function will change this variable
-		OUT PlayerViewPointRotation
-	);
-	// Prints Location and rotation to the screen
-	// REMEMBER!!!! WE NEED TO DEREFERENCE BY ADDING A STAR TO THE PARAMETERS OF THE FORMATING STRING!!!!
-	/*UE_LOG(LogTemp, Warning, TEXT("Location: %s, Rotation: %s"),
-	*PlayerViewPointLocation.ToString(),
-	*PlayerViewPointRotation.ToString()
-	);*/
-
+	// Get player's start position for line trace
+	FVector PlayerViewPointLocation = GetLineTraceStart();
+	
 	// Draw a red trace in the world to visual
 	// Calculates the where the LINE TRACE ends ( * Reach)
-	FVector LineTraceEnd = PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
-	//DrawDebugLine(
-	//	GetWorld(),
-	//	PlayerViewPointLocation,
-	//	LineTraceEnd,
-	//	FColor(255, 0, 0),
-	//	false,
-	//	0.f,
-	//	0.f,
-	//	10.f
-	//);
+	FVector LineTraceEnd = GetLineTraceEnd();
+		//DrawDebugLine(
+		//	GetWorld(),
+		//	PlayerViewPointLocation,
+		//	LineTraceEnd,
+		//	FColor(255, 0, 0),
+		//	false,
+		//	0.f,
+		//	0.f,
+		//	10.f
+		//);
 
 	// Setup query parameters
 	FCollisionQueryParams TraceParameters(FName(TEXT("")), false, GetOwner());
@@ -183,6 +157,38 @@ FHitResult UGrabber::GetFirstPhysicsBodyInReach() const
 			*ActorsName
 		);
 	}
-
 	return Hit;
+}
+
+FVector UGrabber::GetLineTraceStart() const
+{
+	FVector PlayerViewPointLocation;
+	FRotator PlayerViewPointRotation;
+	ActorController->GetPlayerViewPoint(
+		OUT PlayerViewPointLocation, // The calling function will change this variable
+		OUT PlayerViewPointRotation
+	);
+
+	// Sets the end of a line trace in the world according to the Pawn location
+	return PlayerViewPointLocation;
+}
+
+// Gets player view point
+FVector UGrabber::GetLineTraceEnd() const
+{
+	FVector PlayerViewPointLocation;
+	FRotator PlayerViewPointRotation;
+	ActorController->GetPlayerViewPoint(
+		OUT PlayerViewPointLocation, // The calling function will change this variable
+		OUT PlayerViewPointRotation
+	);
+	// Prints Location and location to the screen
+	// REMEMBER!!!! WE NEED TO DEREFERENCE BY ADDING A STAR TO THE PARAMETERS OF THE FORMATING STRING!!!!
+	/*UE_LOG(LogTemp, Warning, TEXT("Location: %s, Rotation: %s"),
+	*PlayerViewPointLocation.ToString(),
+	*PlayerViewPointRotation.ToString()
+	);*/
+
+	// Sets the end of a line trace in the world according to the Pawn location
+	return PlayerViewPointLocation + PlayerViewPointRotation.Vector() * Reach;
 }

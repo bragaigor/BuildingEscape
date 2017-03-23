@@ -43,6 +43,9 @@ private:
 
 	// Makes it available in unreal editor, and it is editable 
 	// UPROPERTY(EditAnywhere)
-	AActor* ActorThatOpens;
+	// AActor* ActorThatOpens;
 	AActor* Owner; // The owning door
+
+	// Returns total mass in kg in pressure plate
+	float GetTotalMassOfActorOnPlate();
 };
