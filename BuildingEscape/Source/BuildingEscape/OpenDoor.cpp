@@ -12,8 +12,6 @@ UOpenDoor::UOpenDoor()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -25,12 +23,14 @@ void UOpenDoor::BeginPlay()
 	Owner = GetOwner();
 	// A pawn is a actor that's why we can do it
 	// ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
-	
+	if (!PressurePlate)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s missing pressure plate"), *GetOwner()->GetName())
+	}
 }
 
 void UOpenDoor::OpenDoor()
 {
-	
 	// Create a rotator.
 	// Parameters.
 	// 1st Pitch:
@@ -39,14 +39,15 @@ void UOpenDoor::OpenDoor()
 	// FRotator NewRotation = FRotator(0.0f, OpenAngle, 0.0f);
 	// Find Z rotation 
 	// Owner->SetActorRotation(NewRotation);
-	Owner->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
-	isDoorOpenned = true;
+
+	// Owner->SetActorRotation(FRotator(0.0f, OpenAngle, 0.0f));
+	OnOpen.Broadcast();
 }
 
 void UOpenDoor::CloseDoor()
 {
-	Owner->SetActorRotation(FRotator(0.0f, OpenAngle-90.f, 0.0f));
-	isDoorOpenned = false;
+	// Owner->SetActorRotation(FRotator(0.0f, OpenAngle-90.f, 0.0f));
+	OnClose.Broadcast();
 }
 
 
@@ -55,23 +56,13 @@ void UOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FActorCompo
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	if (GetTotalMassOfActorOnPlate() > 30.f) { // TODO make into a parameter
+	if (GetTotalMassOfActorOnPlate() > TriggerMass) { 
 		OpenDoor();
-		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
 	}
-	// Pool the Trigger Volume
-	//if (PressurePlate->IsOverlappingActor(ActorThatOpens)) {
-	//	OpenDoor();
-	//	LastDoorOpenTime = GetWorld()->GetTimeSeconds();
-	//}
-	
-	// Check if it is time to close the door
-	if (isDoorOpenned) {
-		if ((GetWorld()->GetTimeSeconds() - LastDoorOpenTime) > DoorCloseDelay) {
-			CloseDoor();
-		}
+	else
+	{
+		CloseDoor();
 	}
-	
 }
 
 float UOpenDoor::GetTotalMassOfActorOnPlate() {
@@ -80,6 +71,7 @@ float UOpenDoor::GetTotalMassOfActorOnPlate() {
 	//Find all the overlapping actors
 	TArray<AActor*> OverlappingActors;
 	// This method returns an array of overlapping actor that will be stored in OverlappingActors
+	if (!PressurePlate) { return -1; }
 	PressurePlate->GetOverlappingActors(OUT OverlappingActors);
 
 	// Iterate through them adding their masses
@@ -93,8 +85,6 @@ float UOpenDoor::GetTotalMassOfActorOnPlate() {
 			);
 		}
 	}
-	
-
 	return TotalMass;
 }
 

@@ -80,6 +80,8 @@ void UGrabber::Grab() {
 	auto ComponentToGrab = HitResult.GetComponent(); // Gets the mesh in our case 
 	auto ActorHit = HitResult.GetActor();
 
+	if (!PhysicsHandle) { return; }
+
 	/// If we hit something then attach a physics handle
 	if (ActorHit)
 	{
@@ -95,7 +97,9 @@ void UGrabber::Grab() {
 
 void UGrabber::Release() {
 	UE_LOG(LogTemp, Warning, TEXT("Grab released."));
-	// TODO release physics handle
+
+	if (!PhysicsHandle) { return; }
+	// Release physics handle
 	PhysicsHandle->ReleaseComponent();
 }
 
@@ -103,6 +107,8 @@ void UGrabber::Release() {
 void UGrabber::TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction )
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
+
+	if (!PhysicsHandle) { return; }
 
 	// If the physics handle is atached 
 	if (PhysicsHandle->GrabbedComponent)
@@ -164,6 +170,14 @@ FVector UGrabber::GetLineTraceStart() const
 {
 	FVector PlayerViewPointLocation;
 	FRotator PlayerViewPointRotation;
+
+	if (!ActorController) 
+	{ 
+		UE_LOG(LogTemp, Error, TEXT("%s missing ActorController."),
+			*GetOwner()->GetName())
+		return FVector(); 
+	}
+
 	ActorController->GetPlayerViewPoint(
 		OUT PlayerViewPointLocation, // The calling function will change this variable
 		OUT PlayerViewPointRotation
@@ -178,6 +192,12 @@ FVector UGrabber::GetLineTraceEnd() const
 {
 	FVector PlayerViewPointLocation;
 	FRotator PlayerViewPointRotation;
+	if (!ActorController)
+	{
+		UE_LOG(LogTemp, Error, TEXT("%s missing ActorController."),
+			*GetOwner()->GetName())
+			return FVector();
+	}
 	ActorController->GetPlayerViewPoint(
 		OUT PlayerViewPointLocation, // The calling function will change this variable
 		OUT PlayerViewPointRotation
